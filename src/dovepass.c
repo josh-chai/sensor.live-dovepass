@@ -24,7 +24,8 @@
 
 int main(int argc, char **argv) {
     struct Product product;
+
     product = get_product();
-    
-    // printf("%s", product.serial_number);
+
+    printf("%s", product.serial_number);
 }
