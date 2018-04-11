@@ -6,9 +6,11 @@ CC = gcc
 DEBUG = @
 
 APP_DIR = .
+APP_INCLUDES_DIR = ./includes
 APP_INCLUDE_DIRS += -I $(APP_DIR)
 APP_NAME = dovepass
-APP_SRC_FILES = $(APP_NAME).c
+APP_SRC_FILES += $(APP_NAME).c
+APP_SRC_FILES += $(shell find $(APP_INCLUDES_DIR) -name '*.c')
 
 IOT_CLIENT_DIR = ./libs/aws-iot-device-sdk
 
