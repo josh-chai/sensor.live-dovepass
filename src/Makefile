@@ -65,7 +65,7 @@ all:
 
 install:
 	cp $(APP_NAME) /usr/local/bin/$(APP_NAME)
-	cp init.d /etc/init.d/$(APP_NAME)
+	cp init /etc/init.d/$(APP_NAME)
 	chmod +x /etc/init.d/$(APP_NAME)
 	update-rc.d $(APP_NAME) defaults 99 1
 
