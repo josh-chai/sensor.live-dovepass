@@ -1,0 +1,14 @@
+{
+    "boot_brand":"BM",
+    "boot_type":"MODBUS",
+    "boot_version":1,
+    "boot_url":"https://sam-api.sensor.live/devices/config/get",
+    "boot_token":"12345",
+    "boot_desc":"banana-pi M2+",
+    "netname": "eth0",
+    "data_path": "/var/aws/certs/",
+    "rootca_key": "rootca.key",
+    "certificate_key": "certificate.key",
+    "device_private_key": "device_private.key",
+    "device_csr_key": "device_csr.key"
+}

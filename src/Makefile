@@ -6,7 +6,6 @@ CC = gcc
 DEBUG = @
 
 APP_DIR = .
-# APP_INCLUDES_DIR = .
 APP_INCLUDES_DIR += ./includes
 APP_INCLUDE_DIRS += -I $(APP_DIR)
 APP_NAME = dovepass
@@ -69,6 +68,7 @@ install:
 	cp init /etc/init.d/$(APP_NAME)
 	chmod +x /etc/init.d/$(APP_NAME)
 	update-rc.d $(APP_NAME) defaults 99 1
+    mkdir -p -m 777 /var/aws/certs
 
 clean:
 	rm -f $(APP_DIR)/$(APP_NAME)
