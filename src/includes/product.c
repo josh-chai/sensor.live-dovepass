@@ -12,9 +12,6 @@ struct Product get_product() {
     interface = get_interface();
     
     char *netname = "eth0";
-    char mac_address[100];
-    get_mac(netname, mac_address);
-    printf("%s", mac_address);
 
     sprintf(temp, "%s:%s", prefix, interface.mac_address);
 

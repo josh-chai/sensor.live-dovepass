@@ -3,5 +3,3 @@ struct Interface {
 };
 
 struct Interface get_interface();
-
-void get_mac(char *iface, char *mac_addr);
