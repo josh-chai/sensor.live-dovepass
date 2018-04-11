@@ -7,7 +7,7 @@
 #include <net/if.h>
 #include <unistd.h>
 
-struct Interface get_interface()
+struct Interface get_interface(char *iface)
 {
     struct Interface interface;
     int fd;
@@ -25,7 +25,7 @@ struct Interface get_interface()
         mac = (unsigned char *)ifr.ifr_hwaddr.sa_data;
         sprintf(interface.mac_address, "%.2X%.2X%.2X%.2X%.2X%.2X" , mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     } else {
-          interface.mac_address = '\0';
+          strcpy(interface.mac_address, '\0');
     }
 
     return interface;

@@ -23,9 +23,9 @@
 #include "includes/product.h"
 
 int main(int argc, char **argv) {
-    struct Product product;
-
-    product = get_product();
-
-    printf("%s", product.serial_number);
+    if (strcmp(argv[1], "-sn") == 0) {
+        struct Product product;
+        product = get_product();
+        printf("Your Serial Number is %s\n", product.serial_number);
+    }
 }

@@ -7,11 +7,11 @@ struct Product get_product() {
 
     struct Interface interface;
 
+    char *iface = "eth0";
     char *prefix = "BM";
     char temp[16];
-    interface = get_interface();
-    
-    char *netname = "eth0";
+
+    interface = get_interface(iface);
 
     sprintf(temp, "%s:%s", prefix, interface.mac_address);
 
