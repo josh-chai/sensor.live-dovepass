@@ -58,15 +58,16 @@ MBED_TLS_MAKE_CMD = $(MAKE) -C $(MBEDTLS_DIR)
 PRE_MAKE_CMD = $(MBED_TLS_MAKE_CMD)
 MAKE_CMD = $(CC) $(SRC_FILES) $(COMPILER_FLAGS) -o $(APP_NAME) $(LD_FLAG) $(EXTERNAL_LIBS) $(INCLUDE_ALL_DIRS)
 
-INSTALL_CMD = cp $(APP_NAME) /usr/local/bin/$(APP_NAME)
-
 all:
 	$(PRE_MAKE_CMD)
 	$(DEBUG)$(MAKE_CMD)
 	$(POST_MAKE_CMD)
 
 install:
-	$(INSTALL_CMD)
+	cp $(APP_NAME) /usr/local/bin/$(APP_NAME)
+	cp init.d /etc/init.d/$(APP_NAME)
+	chmod +x /etc/init.d/$(APP_NAME)
+	update-rc.d $(APP_NAME) defaults 99 1
 
 clean:
 	rm -f $(APP_DIR)/$(APP_NAME)
