@@ -1,5 +1,5 @@
 .prevent_execution:
-    exit 0
+	exit 0
 
 CC = gcc
 
@@ -7,7 +7,7 @@ DEBUG = @
 
 APP_DIR = .
 APP_INCLUDE_DIRS += -I $(APP_DIR)
-APP_NAME = dove
+APP_NAME = dovepass
 APP_SRC_FILES = $(APP_NAME).c
 
 IOT_CLIENT_DIR = ./libs/aws-iot-device-sdk
@@ -57,10 +57,10 @@ PRE_MAKE_CMD = $(MBED_TLS_MAKE_CMD)
 MAKE_CMD = $(CC) $(SRC_FILES) $(COMPILER_FLAGS) -o $(APP_NAME) $(LD_FLAG) $(EXTERNAL_LIBS) $(INCLUDE_ALL_DIRS)
 
 all:
-    $(PRE_MAKE_CMD)
-    $(DEBUG)$(MAKE_CMD)
-    $(POST_MAKE_CMD)
+	$(PRE_MAKE_CMD)
+	$(DEBUG)$(MAKE_CMD)
+	$(POST_MAKE_CMD)
 
 clean:
-    rm -f $(APP_DIR)/$(APP_NAME)
-    $(MBED_TLS_MAKE_CMD) clean
+	rm -f $(APP_DIR)/$(APP_NAME)
+	$(MBED_TLS_MAKE_CMD) clean
