@@ -15,7 +15,7 @@ struct Product get_product() {
 
     sprintf(temp, "%s:%s", prefix, interface.mac_address);
 
-    dove_encode(temp, "", product.serial_number);
+    dove_encode(temp, NULL, product.serial_number);
 
     return product;
 }
