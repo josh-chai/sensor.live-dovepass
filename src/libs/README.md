@@ -1,0 +1,1 @@
+# Clone library for running the aws-iot-device-sdk
