@@ -68,8 +68,8 @@ install:
 	cp init /etc/init.d/$(APP_NAME)
 	chmod +x /etc/init.d/$(APP_NAME)
 	update-rc.d $(APP_NAME) defaults 99 1
-    mkdir -p -m 777 /var/aws/certs
-    cp bootstrap.json /var/aws/certs
+	mkdir -p -m 777 /var/aws/certs
+	cp bootstrap.json /var/aws/certs
 
 clean:
 	rm -f $(APP_DIR)/$(APP_NAME)

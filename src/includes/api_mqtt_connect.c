@@ -182,6 +182,12 @@ int api_mqtt_connect(struct connect_info connect_info) {
 	mqttInitParams.isSSLHostnameVerify = true;
 	mqttInitParams.disconnectHandler = disconnectCallbackHandler;
 	mqttInitParams.disconnectHandlerData = NULL;
+    printf("------------\n");
+    printf("@@ pHostURL:%s\n", mqttInitParams.pHostURL);
+    printf("@@ port:%d\n", mqttInitParams.port);
+    printf("@@ pRootCALocation:%s\n", mqttInitParams.pRootCALocation);
+    printf("@@ pDeviceCertLocation:%s\n", mqttInitParams.pDeviceCertLocation);
+    printf("@@ pDevicePrivateKeyLocation:%s\n", mqttInitParams.pDevicePrivateKeyLocation);
 
 	rc = aws_iot_mqtt_init(&client, &mqttInitParams);
 	if(SUCCESS != rc) {
@@ -196,6 +202,8 @@ int api_mqtt_connect(struct connect_info connect_info) {
 	// connectParams.pClientID = connect_info.mac_addr;
 	// connectParams.clientIDLen = (uint16_t) strlen(AWS_IOT_MQTT_CLIENT_ID);
 	connectParams.clientIDLen = (uint16_t) strlen(connectParams.pClientID);
+    printf("@@ pClientID:%s\n", connectParams.pClientID);
+    printf("@@ clientIDLen:%d\n", connectParams.clientIDLen);
 	connectParams.isWillMsgPresent = false;
 
 	IOT_INFO("Connecting...");
