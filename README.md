@@ -22,3 +22,13 @@ Start complier source code
 ```
 make
 ```
+
+## About Proudct
+### How to get your product's serial number?
+```
+dovepass -sn
+```
+
+## Licenses
+
+GNU GPLv3, see the [LICENSE](./LICENSE) file.
