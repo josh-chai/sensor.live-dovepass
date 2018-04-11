@@ -20,7 +20,8 @@ mv libs/mbedTLS/* libs/aws-iot-device-sdk/external_libs/mbedTLS; rm -R libs/mbed
 ```
 Start complier source code
 ```
-make; sudo make install
+make
+sudo make install
 ```
 
 ## About Proudct
