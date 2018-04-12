@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
 
 
         // publish mqtt
-        if (strcmp(argv[1], "-mqttpub") == 0) {
+        if (strcmp(argv[1], "-mqttstart") == 0) {
             connect_info = get_connect_info();
 	        api_mqtt_connect(connect_info);
             return (0);

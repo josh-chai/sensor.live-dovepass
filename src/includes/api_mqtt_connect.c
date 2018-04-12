@@ -182,12 +182,6 @@ int api_mqtt_connect(struct connect_info connect_info) {
 	mqttInitParams.isSSLHostnameVerify = true;
 	mqttInitParams.disconnectHandler = disconnectCallbackHandler;
 	mqttInitParams.disconnectHandlerData = NULL;
-    printf("------------\n");
-    printf("@@ pHostURL:%s\n", mqttInitParams.pHostURL);
-    printf("@@ port:%d\n", mqttInitParams.port);
-    printf("@@ pRootCALocation:%s\n", mqttInitParams.pRootCALocation);
-    printf("@@ pDeviceCertLocation:%s\n", mqttInitParams.pDeviceCertLocation);
-    printf("@@ pDevicePrivateKeyLocation:%s\n", mqttInitParams.pDevicePrivateKeyLocation);
 
 	rc = aws_iot_mqtt_init(&client, &mqttInitParams);
 	if(SUCCESS != rc) {
@@ -203,31 +197,25 @@ int api_mqtt_connect(struct connect_info connect_info) {
 	// connectParams.pClientID = connect_info.mac_addr;
 	// connectParams.clientIDLen = (uint16_t) strlen(AWS_IOT_MQTT_CLIENT_ID);
 	connectParams.clientIDLen = (uint16_t) strlen(connectParams.pClientID);
-    printf("@@ pClientID:%s\n", connectParams.pClientID);
-    printf("@@ clientIDLen:%d\n", connectParams.clientIDLen);
 	connectParams.isWillMsgPresent = false;
 
 	IOT_INFO("Connecting...");
-	rc = aws_iot_mqtt_connect(&client, &connectParams);
-	if(SUCCESS != rc) {
-		IOT_ERROR("Error(%d) connecting to %s:%d", rc, mqttInitParams.pHostURL, mqttInitParams.port);
+    while(true) {
+        rc = aws_iot_mqtt_connect(&client, &connectParams);
+        if(SUCCESS != rc) {
+            IOT_ERROR("Error(%d) connecting to %s:%d", rc, mqttInitParams.pHostURL, mqttInitParams.port);
 
-		ClientState mqtt_status;
-		mqtt_status = aws_iot_mqtt_get_client_state(&client);
-		IOT_INFO("isPingOutstanding: %d", mqtt_status);
+            ClientState mqtt_status;
+            mqtt_status = aws_iot_mqtt_get_client_state(&client);
+            IOT_INFO("isPingOutstanding: %d", mqtt_status);
 
-		// reconnect
-		IOT_INFO("reConnecting...");
-		rc = aws_iot_mqtt_connect(&client, &connectParams);
-		if(SUCCESS != rc) {
-		IOT_ERROR("Error(%d) connecting to %s:%d", rc, mqttInitParams.pHostURL, mqttInitParams.port);
+            sleep(10);
+        }
+        else {
+            break;
+        }
 
-		ClientState mqtt_status;
-		mqtt_status = aws_iot_mqtt_get_client_state(&client);
-		IOT_INFO("isPingOutstanding: %d", mqtt_status);
-		return rc;
-		}
-	}
+    }
 	/*
 	 * Enable Auto Reconnect functionality. Minimum and Maximum time of Exponential backoff are set in aws_iot_config.h
 	 *  #AWS_IOT_MQTT_MIN_RECONNECT_WAIT_INTERVAL
