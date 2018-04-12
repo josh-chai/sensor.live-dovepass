@@ -198,7 +198,8 @@ int api_mqtt_connect(struct connect_info connect_info) {
 	connectParams.keepAliveIntervalInSec = 600;
 	connectParams.isCleanSession = true;
 	connectParams.MQTTVersion = MQTT_3_1_1;
-	connectParams.pClientID = AWS_IOT_MQTT_CLIENT_ID;
+	// connectParams.pClientID = AWS_IOT_MQTT_CLIENT_ID;
+	connectParams.pClientID = connect_info.thing_name;
 	// connectParams.pClientID = connect_info.mac_addr;
 	// connectParams.clientIDLen = (uint16_t) strlen(AWS_IOT_MQTT_CLIENT_ID);
 	connectParams.clientIDLen = (uint16_t) strlen(connectParams.pClientID);
