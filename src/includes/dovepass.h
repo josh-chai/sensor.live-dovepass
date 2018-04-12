@@ -13,7 +13,7 @@ desc: dovepass表頭檔, 定義自身使用的各常數
 // config file name, ???
 #define DOVEPASS_DATA_PATH "/var/aws/certs/"
 #define BOOTSTRAP_CONFIG DOVEPASS_DATA_PATH "bootstrap.json"
-#define CONNECT_CONFIG DOVEPASS_DATA_PATH "connections.json"
+#define CONNECT_INFO DOVEPASS_DATA_PATH "connect_info.json"
 #define DEVICE_CONFIG DOVEPASS_DATA_PATH "device_config.json"
 #define BOOTSTRAP_BIN DOVEPASS_DATA_PATH "dovpass.bin"
 
@@ -77,10 +77,19 @@ struct mqtt_connect {
 	char	*mqtt_conn;
 };
 
+
+struct url_data {
+    size_t size;
+    char* data;
+};
+
+
 // define function
 int putfile(char *, char *);		// 存入文字檔
 struct bootstrap_json bootstrap_go();
+int check_connect_info(struct bootstrap_json);
 struct connect_info api_boot_version_check(struct bootstrap_json);
+struct connect_info get_connect_info();
 void api_download_file(char*, char*);
 struct connect_info api_check_key_file(struct boot_version_check, struct bootstrap_json);
 // struct mqtt_connect api_mqtt_connect(struct connect_info, char *);

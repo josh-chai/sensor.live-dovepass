@@ -14,11 +14,6 @@ desc: api functions
 #include <cjson/cJSON.h>
 #include "dovepass.h"
 
-struct url_data {
-    size_t size;
-    char* data;
-};
-
 // 存入文字檔
 int putfile(char *file_path, char *contents) {
 	FILE *fp;

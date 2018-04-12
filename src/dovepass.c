@@ -26,37 +26,44 @@ devconfig.json  本設備的各項設定檔
 #include "includes/product.h"
 
 int main(int argc, char* argv[]) {
-    /*
-    struct bootstrap_json bootstrap_go();
-    struct connect_info api_boot_version_check(struct bootstrap_json);
-    void api_download_file(char*, char*);
-    int api_mqtt_connect(struct connect_info);
-    void api_mqtt_access();
-    */
 	struct bootstrap_json bootstraps;
 	struct boot_version_check boot_version_check;
 	struct connect_info connect_info;
 	int mqtt_connect;
 
-    if (argc > 1 && strcmp(argv[1], "-sn") == 0) {
-        struct Product product;
-        product = get_product();
-        printf("Your Serial Number is %s\n", product.serial_number);
-        return(0);
+    if (argc > 1) {
+        if (strcmp(argv[1], "-sn") == 0) {
+            struct Product product;
+            product = get_product();
+            printf("Your Serial Number is %s\n", product.serial_number);
+            return(0);
+        }
+
+        // check connection information
+        if (strcmp(argv[1], "-bootstrap") == 0) {
+	        bootstraps = bootstrap_go();
+            check_connect_info(bootstraps);
+            return (0);
+        }
+
+
+        // publish mqtt
+        if (strcmp(argv[1], "-mqttpub") == 0) {
+            connect_info = get_connect_info();
+	        api_mqtt_connect(connect_info);
+            return (0);
+        }
     }
 
-	bootstraps = bootstrap_go();
 
-	connect_info = api_boot_version_check(bootstraps);
+	// connect_info = api_boot_version_check(bootstraps);
 
 	// if version update, download bootstrap.bin(OTA)
-	api_download_file(boot_version_check.url, BOOTSTRAP_BIN);
+	// api_download_file(boot_version_check.url, BOOTSTRAP_BIN);
 
-	// connect to mqtt
-	mqtt_connect = api_mqtt_connect(connect_info);
 
 	// mqtt publish and subscribe
-	api_mqtt_access();
+	// api_mqtt_access();
 
     return(0);
 }
