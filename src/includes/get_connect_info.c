@@ -96,7 +96,7 @@ struct connect_info get_connect_info() {
         }
         */
 
-        sprintf(connect_info.rawdata_mqtt_topic, "$aws/things/%s/shadow/get/accepted", connect_info.thing_name);
+        sprintf(connect_info.rawdata_mqtt_topic, "$aws/things/%s/shadow/update", connect_info.thing_name);
     }
 
     return connect_info;
