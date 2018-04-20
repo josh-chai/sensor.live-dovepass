@@ -16,7 +16,7 @@ git clone https://github.com/aws/aws-iot-device-sdk-embedded-C.git libs/aws-iot-
 Clone mbedTLS into aws-iot-device-sdk external_libs
 ```
 git clone https://github.com/ARMmbed/mbedtls.git libs/mbedTLS
-mv libs/mbedTLS/* libs/aws-iot-device-sdk/external_libs/mbedTLS; rm -R libs/mbedTLS
+mv libs/mbedTLS/* libs/aws-iot-device-sdk/external_libs/mbedTLS; rm -fr libs/mbedTLS
 ```
 Start complier source code
 ```
