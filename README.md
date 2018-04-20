@@ -9,26 +9,21 @@ Change directory to src folder
 ```
 cd <your_project_folder>
 ```
-Clone aws-iot-device-sdk into libs
+Clone dovepass package
 ```
-git clone https://github.com/aws/aws-iot-device-sdk-embedded-C.git libs/aws-iot-device-sdk
+git clone https://github.com/SoftChef/sensor.live-dovepass
+cd sensor.live-dovepass/
+bash ./allinone-install.sh
 ```
-Clone mbedTLS into aws-iot-device-sdk external_libs
+Wait until installation complete ...
+test program (get serial number)
 ```
-git clone https://github.com/ARMmbed/mbedtls.git libs/mbedTLS
-mv libs/mbedTLS/* libs/aws-iot-device-sdk/external_libs/mbedTLS; rm -fr libs/mbedTLS
+cd src
+./dovepass -sn
 ```
-Start complier source code
-```
-make
-sudo make install
-```
+output example:
 
-## About Proudct
-### How to get your product's serial number?
-```
-dovepass -sn
-```
+Your Serial Number is ESE3D0ESEVDQDSETDSDTDUDYDXDYDS
 
 ## Licenses
 
