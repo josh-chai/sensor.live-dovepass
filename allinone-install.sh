@@ -2,7 +2,7 @@
 ###################################
 # allinone-install.sh
 #
-# cd <your_project_folder>/src
+# cd <your_project_folder>
 # git clone https://github.com/SoftChef/sensor.live-dovepass
 # cd sensor.live-dovepass/
 # bash ./allinone-install.sh

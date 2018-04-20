@@ -7,7 +7,7 @@ Steps:
 Clone this repository
 Change directory to src folder
 ```
-cd <your_project_folder>/src
+cd <your_project_folder>
 ```
 Clone aws-iot-device-sdk into libs
 ```
