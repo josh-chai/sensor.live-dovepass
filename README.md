@@ -23,7 +23,7 @@ cd src
 ```
 output example:
 
-Your Serial Number is ESE3D0ESEVDQDSETDSDTDUDYDXDYDS
+exp: Your Serial Number is ESE3D0ESEVDQDSETDSDTDUDYDXDYDS
 
 ## Licenses
 
