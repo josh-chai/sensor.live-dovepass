@@ -31,6 +31,23 @@
 #include <unistd.h>
 #include <limits.h>
 #include <string.h>
+#include <cjson/cJSON.h>
+
+// for local mqtt
+#include <mosquitto.h>
+
+// Server connection parameters
+#define MQTT_HOSTNAME "localhost"
+#define MQTT_PORT 1883
+#define MQTT_USERNAME "pi"
+#define MQTT_PASSWORD "bananapi"
+#define MQTT_TOPIC_DEV2AWS "/jitr/dev/aws"
+#define MQTT_TOPIC_AWS2DEV "/jitr/aws/dev"
+
+struct mosquitto *mosq = NULL;
+// static char *sub_topic = "$aws/things/cbd062743be8d5f93fe6b6e7ae597114747a5561/shadow/update/accepted";
+static char *sub_topic = "$aws/things/cbd062743be8d5f93fe6b6e7ae597114747a5561/shadow/update/delta";
+// static char *sub_topic = "$aws/things/cbd062743be8d5f93fe6b6e7ae597114747a5561/shadow/update";
 
 #include "aws_iot_config.h"
 #include "aws_iot_log.h"
@@ -38,6 +55,7 @@
 #include "aws_iot_mqtt_client_interface.h"
 
 #include "dovepass.h"
+
 
 /**
  * @brief Default cert location
@@ -49,6 +67,8 @@ char certDirectory[PATH_MAX + 1] = "/var/aws/certs/";
  */
 char HostAddress[255] = AWS_IOT_MQTT_HOST;
 
+static char oldbuf[255] = "\0";
+
 /**
  * @brief Default MQTT port is pulled from the aws_iot_config.h
  */
@@ -59,13 +79,58 @@ uint32_t port = AWS_IOT_MQTT_PORT;
  */
 uint32_t publishCount = 0;
 
-void iot_subscribe_callback_handler(AWS_IoT_Client *pClient, char *topicName, uint16_t topicNameLen,
+char cPayload[1024];
+char topic_buf[256];
+
+IoT_Publish_Message_Params paramsQOS0;
+IoT_Publish_Message_Params paramsQOS1;
+
+AWS_IoT_Client client;
+
+char *topic_thing_name;
+char *topic_thing_type_name;
+
+static char raw_buf_in[1000], buf_in[1000] = "\0", config[1000] = "\0";
+
+void  iot_subscribe_callback_handler(AWS_IoT_Client *pClient, char *topicName, uint16_t topicNameLen,
 									IoT_Publish_Message_Params *params, char *pData) {
-	IOT_UNUSED(pData);
-	IOT_UNUSED(pClient);
-	IOT_INFO("Subscribe callback");
-	IOT_INFO("%.*s\t%.*s", topicNameLen, topicName, (int) params->payloadLen, params->payload);
+	cJSON *json, *jdata;
+  printf("######[%s]\n", params->payload);
+  json = cJSON_Parse(params->payload);
+  if (json == NULL) {
+		//   return (void) NULL;
+		return (void) NULL;
+	}
+  json = cJSON_GetObjectItem(json, "state");
+  jdata = cJSON_GetObjectItem(json, "device_config");
+  //   printf("%s\n", jdata->valuestring);
+
+  if (jdata) {
+      strcpy(raw_buf_in, cJSON_Print(jdata));
+      strcpy(config, jdata->valuestring);
+      printf("+++raw_buf_in:[%s]\n", raw_buf_in);
+      printf("+++config:[%s]\n", config);
+      printf("+++buf_in:[%s]\n", buf_in);
+      if (strcmp(buf_in, config)) {
+        strcpy(buf_in, config);
+        putfile(DEV_CONFIG_MODBUS, buf_in);
+        mosquitto_publish (mosq, NULL, MQTT_TOPIC_AWS2DEV, strlen(buf_in), buf_in, 0, false);
+
+        // disable delta
+
+        sprintf(topic_buf, "$aws/things/%s/shadow/update", topic_thing_name);
+        sprintf(cPayload, "{\"state\":{\"reported\":{\"device_config\":%s}}}", raw_buf_in);
+        printf("+++before send:[%s]\n", cPayload);
+	      paramsQOS0.payload = cPayload;
+        paramsQOS0.payloadLen = strlen(cPayload);
+        aws_iot_mqtt_publish(&client, topic_buf, strlen(topic_buf), &paramsQOS0);
+      }
+  }
+  else {
+    return (void) NULL;
+  }
 }
+
 
 void disconnectCallbackHandler(AWS_IoT_Client *pClient, void *data) {
 	IOT_WARN("MQTT Disconnect");
@@ -90,46 +155,30 @@ void disconnectCallbackHandler(AWS_IoT_Client *pClient, void *data) {
 	}
 }
 
-void parseInputArgsForConnectParams(int argc, char **argv) {
-	int opt;
 
-	while(-1 != (opt = getopt(argc, argv, "h:p:c:x:"))) {
-		switch(opt) {
-			case 'h':
-				strcpy(HostAddress, optarg);
-				IOT_DEBUG("Host %s", optarg);
-				break;
-			case 'p':
-				port = atoi(optarg);
-				IOT_DEBUG("arg %s", optarg);
-				break;
-			case 'c':
-				strcpy(certDirectory, optarg);
-				IOT_DEBUG("cert root directory %s", optarg);
-				break;
-			case 'x':
-				publishCount = atoi(optarg);
-				IOT_DEBUG("publish %s times\n", optarg);
-				break;
-			case '?':
-				if(optopt == 'c') {
-					IOT_ERROR("Option -%c requires an argument.", optopt);
-				} else if(isprint(optopt)) {
-					IOT_WARN("Unknown option `-%c'.", optopt);
-				} else {
-					IOT_WARN("Unknown option character `\\x%x'.", optopt);
-				}
-				break;
-			default:
-				IOT_ERROR("Error in command line argument parsing");
-				break;
-		}
-	}
+// upload message to aws
+upload_aws_message_callback(struct mosquitto *mosq, void *obj, const struct mosquitto_message *message) {
+  int rc;
 
+  sprintf(cPayload, "{\"state\":%s}", (char *)message->payload);
+	paramsQOS0.qos = QOS0;
+	paramsQOS0.isRetained = 0;
+	paramsQOS0.payload = cPayload;
+	paramsQOS0.payloadLen = strlen(cPayload);
+//   printf("publish=>[%s]\n", cPayload);
+   printf("payload=>len[%s][%d]\n", paramsQOS0.payload, paramsQOS0.payloadLen);
+
+  sprintf(topic_buf, "$aws/things/%s/shadow/update", topic_thing_name);
+  // rc = aws_iot_mqtt_publish(&client, "$aws/things/cbd062743be8d5f93fe6b6e7ae597114747a5561/shadow/update", 66, &paramsQOS0);
+  rc = aws_iot_mqtt_publish(&client, topic_buf, strlen(topic_buf), &paramsQOS0);
+  sprintf(topic_buf, "@sensor.live/thing_types/%s/things/%s/history", topic_thing_type_name, topic_thing_type_name);
+  rc = aws_iot_mqtt_publish(&client, topic_buf, strlen(topic_buf), &paramsQOS0);
 }
+
 
 // ------------- test mqtt here ------------------------------------------
 // int main(int argc, char **argv) {
+// int api_mqtt_connect(struct connect_info connect_info) {
 int api_mqtt_connect(struct connect_info connect_info) {
 	bool infinitePublishFlag = true;
 
@@ -137,21 +186,54 @@ int api_mqtt_connect(struct connect_info connect_info) {
 	char clientCRT[PATH_MAX + 1];
 	char clientKey[PATH_MAX + 1];
 	char CurrentWD[PATH_MAX + 1];
-	char cPayload[100];
+
+  topic_thing_name = connect_info.thing_name;
+  topic_thing_type_name = connect_info.thing_type_name;
 
 	int32_t i = 0;
 
 	IoT_Error_t rc = FAILURE;
 
-	AWS_IoT_Client client;
+	// AWS_IoT_Client client;
 	IoT_Client_Init_Params mqttInitParams = iotClientInitParamsDefault;
 	IoT_Client_Connect_Params connectParams = iotClientConnectParamsDefault;
 
-	IoT_Publish_Message_Params paramsQOS0;
-	IoT_Publish_Message_Params paramsQOS1;
 
-	// parseInputArgsForConnectParams(argc, argv);
-	IOT_INFO("\nAWS IoT SDK Version %d.%d.%d-%s\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_TAG);
+  // ---------- mqtt init ----------
+  // Initialize the Mosquitto library
+  mosquitto_lib_init();
+  mosq = mosquitto_new (NULL, true, NULL);
+  if (!mosq)
+    {
+    fprintf (stderr, "Can't init Mosquitto library\n");
+    exit (-1);
+    }
+
+  // Set up username and password
+  mosquitto_username_pw_set (mosq, MQTT_USERNAME, MQTT_PASSWORD);
+
+  // Establish a connection to the MQTT server. Do not use a keep-alive ping
+  int ret = mosquitto_connect (mosq, MQTT_HOSTNAME, MQTT_PORT, 0);
+  if (ret)
+    {
+    fprintf (stderr, "Can't connect to Mosquitto server\n");
+    exit (-1);
+    }
+
+  // Subscribe to the specified topic. Multiple topics can be
+  //  subscribed, but only one is used in this simple example.
+  //  Note that we don't specify what to do with the received
+  //  messages at this point
+  ret = mosquitto_subscribe(mosq, NULL, MQTT_TOPIC_DEV2AWS, 0);
+  if (ret)
+    {
+    fprintf (stderr, "Can't publish to Mosquitto server\n");
+    exit (-1);
+    }
+
+  // Specify the function to call when a new message is received
+  mosquitto_message_callback_set (mosq, upload_aws_message_callback);
+
 
 	/*
 	getcwd(CurrentWD, sizeof(CurrentWD));
@@ -228,14 +310,15 @@ int api_mqtt_connect(struct connect_info connect_info) {
 	}
 
 	IOT_INFO("Subscribing...");
-	// rc = aws_iot_mqtt_subscribe(&client, "$aws/things/banana-pi-thing/shadow/get/accepted", 47, QOS0, iot_subscribe_callback_handler, NULL);
-	printf("topic =>[%s]\n", connect_info.rawdata_mqtt_topic);
-	rc = aws_iot_mqtt_subscribe(&client, connect_info.rawdata_mqtt_topic, strlen(connect_info.rawdata_mqtt_topic), QOS0, iot_subscribe_callback_handler, NULL);
+  printf("[%s][%d]topic ...\n", sub_topic, strlen(sub_topic));
+	// rc = aws_iot_mqtt_subscribe(&client, sub_topic, strlen(sub_topic), QOS0, iot_subscribe_callback_handler, NULL);
+	rc = aws_iot_mqtt_subscribe(&client, sub_topic, strlen(sub_topic), QOS0, iot_subscribe_callback_handler, NULL);
+
 	if(SUCCESS != rc) {
 		IOT_ERROR("Error subscribing : %d ", rc);
 		return rc;
 	}
-
+	// printf("rc:%d\n", rc);
 	sprintf(cPayload, "{\"state\":{\"reported\":{\"test\":\"use our credentials success!test!\",\"seq\":%d}}}\n", i);
 
 	paramsQOS0.qos = QOS0;
@@ -249,7 +332,7 @@ int api_mqtt_connect(struct connect_info connect_info) {
 	if(publishCount != 0) {
 		infinitePublishFlag = false;
 	}
-
+  /*
 	while((NETWORK_ATTEMPTING_RECONNECT == rc || NETWORK_RECONNECTED == rc || SUCCESS == rc)
 		  && (publishCount > 0 || infinitePublishFlag)) {
 
@@ -289,9 +372,13 @@ int api_mqtt_connect(struct connect_info connect_info) {
 			publishCount--;
 		}
 	}
+  */
 
-	// Wait for all the messages to be received
-	aws_iot_mqtt_yield(&client, 100);
+//   printf("after loop\n");
+	while(true) {
+		aws_iot_shadow_yield(&client, 500);
+    mosquitto_loop (mosq, 500, 1);
+	}
 
 	if(SUCCESS != rc) {
 		IOT_ERROR("An error occurred in the loop.\n");

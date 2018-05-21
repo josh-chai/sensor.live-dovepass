@@ -37,7 +37,7 @@ struct bootstrap_json bootstrap_go() {
 	cJSON *json, *jdata;
     struct Product product_info;
 
-    if((bootstrap_fp = fopen(BOOTSTRAP_CONFIG, "r+t")) != NULL) {
+    if((bootstrap_fp = fopen(BOOTSTRAP_CONFIG, "r")) != NULL) {
         boot_fd = fileno(bootstrap_fp);
         fstat(boot_fd, &boot_buf);
         boot_size = boot_buf.st_size;
@@ -46,7 +46,7 @@ struct bootstrap_json bootstrap_go() {
         fread(boot_membuf, sizeof(char), boot_size, bootstrap_fp);	// 讀入的json置入記憶體內
 		json = cJSON_Parse(boot_membuf);
 		if (json == NULL) {
-		  	printf("bootstrap.json error !\n");
+		  	printf("bootstrap.json format error !\n");
 			exit (-1);
 		}
 

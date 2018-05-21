@@ -28,7 +28,9 @@ int check_connect_info(struct bootstrap_json bootstraps) {
     struct curl_httppost* last = NULL;
 
     struct url_data data;
-	char versions[10];
+	  char versions[10];
+    char *output;
+    int *size = 0;
 
     // 如果connect info 不存在, 向aws連線及讀取
     if((access(CONNECT_INFO, F_OK)) == -1)  {
@@ -89,15 +91,27 @@ int check_connect_info(struct bootstrap_json bootstraps) {
                     strcpy(connect_info.certificate_key, jdata->valuestring);
                 }
 
+                jdata = cJSON_GetObjectItem(json, "device_config");
+                output = cJSON_Print(jdata);
+                // cJSON *current_element = NULL;
+                // char *current_key = NULL;
+                // cJSON_ArrayForEach(current_element, jdata) {
+                //     current_key = current_element->string;
+                //     if (current_key != NULL)
+                //     {
+                //         printf("%s\n", current_key);
+                //     }
+                // }
+
                 // create key & defice config file
                 putfile(ROOTCA_KEY, connect_info.rootca_key);
                 putfile(CERTIFICATE_KEY, connect_info.certificate_key);
+                // create key & defice config file
+                putfile(ROOTCA_KEY, connect_info.rootca_key);
+                putfile(CERTIFICATE_KEY, connect_info.certificate_key);
+                putfile(DEV_CONFIG_MODBUS, output);
 
-			    // create key & defice config file
-			    putfile(ROOTCA_KEY, connect_info.rootca_key);
-			    putfile(CERTIFICATE_KEY, connect_info.certificate_key);
-
-			    putfile(CONNECT_INFO, data.data);
+                putfile(CONNECT_INFO, data.data);
             }
 
             curl_easy_cleanup(curl);

@@ -74,6 +74,11 @@ struct connect_info get_connect_info() {
             strcpy(connect_info.thing_name, jdata->valuestring);
         }
 
+        jdata = cJSON_GetObjectItem(json, "thing_type_name");
+        if (cJSON_IsString(jdata) && (jdata->valuestring != NULL)) {
+            strcpy(connect_info.thing_type_name, jdata->valuestring);
+        }
+
         jdata = cJSON_GetObjectItem(json, "mqtt_url");
         if (cJSON_IsString(jdata) && (jdata->valuestring != NULL)) {
             strcpy(connect_info.mqtt_url, jdata->valuestring);
@@ -86,7 +91,7 @@ struct connect_info get_connect_info() {
 
         jdata = cJSON_GetObjectItem(json, "device_config");
         if (cJSON_IsString(jdata) && (jdata->valuestring != NULL)) {
-            strcpy(connect_info.device_config, jdata->valuestring);
+            strcpy(connect_info.dev_config_modbus, jdata->valuestring);
         }
 
         /*

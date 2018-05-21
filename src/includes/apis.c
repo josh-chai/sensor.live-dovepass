@@ -154,7 +154,7 @@ struct connect_info api_boot_version_check(struct bootstrap_json bootstraps) {
 
 			jdata = cJSON_GetObjectItem(json, "device_config");
             if (cJSON_IsString(jdata) && (jdata->valuestring != NULL)) {
-                strcpy(connect_info.device_config, jdata->valuestring);
+                strcpy(connect_info.dev_config_modbus, jdata->valuestring);
             }
 
 			strcpy(connect_info.mac_addr, bootstraps.mac_addr);
@@ -285,7 +285,7 @@ struct connect_info api_check_key_file(struct boot_version_check res_version_che
 
 			jdata = cJSON_GetObjectItem(json, "device_config");
             if (cJSON_IsString(jdata) && (jdata->valuestring != NULL)) {
-                strcpy(res_connect_info.device_config, jdata->valuestring);
+                strcpy(res_connect_info.dev_config_modbus, jdata->valuestring);
             }
 
 			jdata = cJSON_GetObjectItem(json, "thing_name");
@@ -324,7 +324,7 @@ struct connect_info api_check_key_file(struct boot_version_check res_version_che
 			// printf("private_key:%s\n", res_connect_info.private_key);
 			// printf("certificate_key:%s\n", res_connect_info.certificate_key);
 
-			printf("device_config:%s\n", res_connect_info.device_config);
+			printf("device_config:%s\n", res_connect_info.dev_config_modbus);
 
 			printf("-----------rawdata_mqtt_topic:%s\n", res_connect_info.rawdata_mqtt_topic);
 			printf("ota_mqtt_topic:%s\n", res_connect_info.ota_mqtt_topic);
